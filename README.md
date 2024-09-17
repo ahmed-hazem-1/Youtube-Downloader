@@ -6,12 +6,12 @@ Welcome to **YouTube Downloader** – your ultimate tool for downloading YouTube
 
 Check out how YouTube Downloader looks in action:
 
-- **Main Page**: ![Main Page](YouTube Downloader/assets/screenshots/MainPage.png)
-- **Download Progress**: ![Progressbar](YouTube%20Downloader/assets/screenshots/Progressbar.png)
-- **Video Qualities**: ![Qualities](YouTube%20Downloader/assets/screenshots/Qualities.png)
-- **Fast Info Collection**: ![Fast Info Collect](YouTube%20Downloader/assets/screenshots/FastInfoCollect.png)
-- **Finish Reminder**: ![Finish Reminder](YouTube%20Downloader/assets/screenshots/FinishReminder.png)
-- **Responsive Design**: ![Responsive](YouTube%20Downloader/assets/screenshots/Responsive.png)
+- **Main Page**: ![Main Page](YouTubeDownloader/assets/screenshots/MainPage.png)
+- **Download Progress**: ![Progressbar](YouTube0Downloader/assets/screenshots/Progressbar.png)
+- **Video Qualities**: ![Qualities](YouTubeDownloader/assets/screenshots/Qualities.png)
+- **Fast Info Collection**: ![Fast Info Collect](YouTubeDownloader/assets/screenshots/FastInfoCollect.png)
+- **Finish Reminder**: ![Finish Reminder](YouTubeDownloader/assets/screenshots/FinishReminder.png)
+- **Responsive Design**: ![Responsive](YouTubeDownloader/assets/screenshots/Responsive.png)
 
 ## 🚀 Features
 

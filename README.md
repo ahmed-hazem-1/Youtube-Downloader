@@ -6,12 +6,12 @@ Welcome to **YouTube Downloader** – your ultimate tool for downloading YouTube
 
 Check out how YouTube Downloader looks in action:
 
-- **Main Page**: ![Main Page](assets/screenshots/MainPage.png)
-- **Download Progress**: ![Progressbar](assets/screenshots/Progressbar.png)
-- **Video Qualities**: ![Qualities](assets/screenshots/Qualities.png)
-- **Fast Info Collection**: ![Fast Info Collect](assets/screenshots/FastInfoCollect.png)
-- **Finish Reminder**: ![Finish Reminder](assets/screenshots/FinishReminder.png)
-- **Responsive Design**: ![Responsive](assets/screenshots/Responsive.png)
+- **Main Page**: ![Main Page](YouTube%20Downloader/assets/screenshots/MainPage.png)
+- **Download Progress**: ![Progressbar](YouTube%20Downloader/assets/screenshots/Progressbar.png)
+- **Video Qualities**: ![Qualities](YouTube%20Downloader/assets/screenshots/Qualities.png)
+- **Fast Info Collection**: ![Fast Info Collect](YouTube%20Downloader/assets/screenshots/FastInfoCollect.png)
+- **Finish Reminder**: ![Finish Reminder](YouTube%20Downloader/assets/screenshots/FinishReminder.png)
+- **Responsive Design**: ![Responsive](YouTube%20Downloader/assets/screenshots/Responsive.png)
 
 ## 🚀 Features
 
@@ -54,7 +54,7 @@ Get started with YouTube Downloader by following these simple steps:
 
 ## 🎨 Customizing the UI
 
-The UI is designed with QDesigner. Find the UI files in the `UIs` directory:
+The UI is designed with QDesigner. Find the UI files in the `YouTube Downloader/UIs` directory:
 
 - `Downloading_page.ui`
 - `YP.ui`
@@ -66,11 +66,11 @@ Open these files with QDesigner to customize the look and feel as you like.
 
 Here’s a quick overview of the project:
 
-- `assets/screenshots/`: Screenshots of the application.
-- `downloader.py`: Logic for handling video downloads.
-- `main.py`: Entry point of the application.
-- `UIs/`: UI files created with QDesigner.
-- `Utils/`: Utility functions and modules.
+- `YouTube Downloader/assets/screenshots/`: Screenshots of the application.
+- `YouTube Downloader/downloader.py`: Logic for handling video downloads.
+- `YouTube Downloader/main.py`: Entry point of the application.
+- `YouTube Downloader/UIs/`: UI files created with QDesigner.
+- `YouTube Downloader/Utils/`: Utility functions and modules.
 
 ## 🤝 Contributing
 

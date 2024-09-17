@@ -1,10 +1,13 @@
 from datetime import timedelta
 import re
+from tqdm import tqdm
 
 from PyQt5.QtCore import QThread, pyqtSignal, QAbstractListModel, Qt, QVariant, QModelIndex
 
 import Utils.utils as utils
 import yt_dlp
+from PyQt5.QtCore import Qt
+import main
 
 
 def format_quality_info(fmt, size):
@@ -37,6 +40,7 @@ def format_quality_info(fmt, size):
         return f"{quality} ({size_str}) ({ext_type})"
     # return f"{quality} (Size unknown) ({ext_type})"
 
+
 def extract_size(quality_string):
     # Split the string by '(' and ')'
     parts = quality_string.split('(')
@@ -49,6 +53,8 @@ def extract_size(quality_string):
     size_str = parts[1].rstrip(')')
 
     return size_str
+
+
 def extract_qualities(formats):
     """
     Extracts video and audio qualities from the list of formats.
@@ -97,17 +103,18 @@ def get_info(ui):
                 'noplaylist': True,  # Ensure that only a single video is processed
             }
             video_info = yt_dlp.YoutubeDL(ydl_opts).extract_info(url, download=False)
-
+            # ui.number_of_videos.setText(video_info.get('n_entries', 0))
             # Check if the extracted info is a dictionary
             # Debugging: Ensure video_info is correctly retrieved
             # print("Video Info:", video_info)
+
 
             ui.Video_Title = video_info.get('title', 'Video Title')
             # if hasattr(self, 'SaveLocationYV'):
             #     self.SaveLocationYV.setText(self.Video_Title)
             if hasattr(ui, 'file_name_label'):
                 ui.file_name_label.setText(ui.Video_Title)
-
+                ui.CurrentDownload.setText(ui.Video_Title)
             video_duration = video_info.get('duration', 0)
             video_duration_str = str(timedelta(seconds=video_duration))
             if hasattr(ui, 'file_duration_label'):
@@ -159,9 +166,46 @@ def get_info(ui):
 #     download_thread.start()
 #
 #
+# class PlaylistDownloadThread(QThread):
+#     download_progress = pyqtSignal(int)
+#     download_finished = pyqtSignal(bool, str)
+#     video_downloading = pyqtSignal(str)  # New signal
+#     total_number_of_videos = pyqtSignal(int)  # New signal
+#     current_video_number = pyqtSignal(int)  # New signal
+#
+#     def __init__(self, ydl_opts, url):
+#         super(PlaylistDownloadThread, self).__init__()
+#         self.ydl_opts = ydl_opts
+#         self.url = url
+#
+#     def run(self):
+#         try:
+#             self.ydl_opts['noplaylist'] = False  # Treat the URL as a playlist
+#             self.ydl_opts['progress_hooks'] = [main.MainApp.update_progress]
+#
+#             with yt_dlp.YoutubeDL(self.ydl_opts) as ydl:
+#                 video_info = ydl.extract_info(self.url, download=False)
+#                 total_video_number = video_info.get('n_entries', 0)
+#                 self.total_number_of_videos.emit(total_video_number)  # Emit the total number of videos signal
+#
+#                 for i, entry in enumerate(video_info['entries'], start=1):
+#                     video_title = entry.get('title', 'Unknown Title')
+#                     self.current_video_number.emit(i)  # Emit the current video number signal
+#                     self.video_downloading.emit(video_title)  # Emit the video downloading signal
+#
+#                     ydl.process_ie_result(entry, download=True)
+#
+#             self.download_finished.emit(True, "Download complete!")
+#         except Exception as e:
+#             self.download_finished.emit(False, str(e))
+
+
 class DownloadThread(QThread):
-    download_progress = pyqtSignal(int)
-    download_finished = pyqtSignal(bool, str)
+    download_progress = pyqtSignal(int)  # Signal to emit progress
+    download_finished = pyqtSignal(bool, str)  # This signal should be properly defined
+    video_downloading = pyqtSignal(str)
+    total_number_of_videos = pyqtSignal(int)
+    current_video_number = pyqtSignal(int)
 
     def __init__(self, ydl_opts, url):
         super(DownloadThread, self).__init__()
@@ -170,110 +214,37 @@ class DownloadThread(QThread):
 
     def run(self):
         try:
-            # Use yt-dlp for downloading
-            import yt_dlp
-            with yt_dlp.YoutubeDL(self.ydl_opts) as ydl:
-                ydl.download([self.url])
-            self.download_finished.emit(True, "Download complete!")
+            # Fetch video info
+            video_info = yt_dlp.YoutubeDL().extract_info(self.url, download=False)
+            total_size = video_info.get('filesize', 0)  # Get total file size
+
+            # Emit the title of the video being downloaded
+            video_title = video_info.get('title', 'Unknown Title')
+            self.video_downloading.emit(video_title)
+
+            # Initialize the progress bar using tqdm
+            with tqdm(total=total_size, unit='B', unit_scale=True, desc="Downloading") as self.progress_bar:
+                self.ydl_opts['progress_hooks'] = [self.emit_progress]  # Hook to track progress
+                with yt_dlp.YoutubeDL(self.ydl_opts) as ydl:
+                    ydl.download([self.url])
+
+            self.download_progress.emit(100)  # Emit 100% completion signal after download
+            self.download_finished.emit(True, "Download complete!")  # Emit finished signal on success
+
         except Exception as e:
-            self.download_finished.emit(False, str(e))
+            self.download_finished.emit(False, str(e))  # Emit finished signal on error
 
-# class DownloadThread(QThread):
-#     # Define signals
-#     download_progress = pyqtSignal(int)  # Signal to report progress (percentage)
-#     download_finished = pyqtSignal(bool, str)  # Signal to report completion (success/failure and message)
-#
-#     def __init__(self, ydl_opts, url):
-#         super(DownloadThread, self).__init__()
-#         self.ydl_opts = ydl_opts
-#         self.url = url
-#
-#     def run(self):
-#         try:
-#             print(yt_dlp.YoutubeDL)  # Print yt_dlp.YoutubeDL to check if it's None
-#             with yt_dlp.YoutubeDL(self.ydl_opts) as ydl:
-#                 # Optionally connect to progress hooks if needed
-#
-#                 ydl.download([self.url])
-#                 self.download_finished.emit(True, "Download completed successfully.")
-#         except Exception as e:
-#             self.download_finished.emit(False, f"Error during download: {str(e)}")
+    def emit_progress(self, progress_info):
+        if progress_info['status'] == 'downloading':
+            downloaded = progress_info.get('downloaded_bytes', 0)
+            total = progress_info.get('total_bytes', 1)
+
+            if self.progress_bar:
+                self.progress_bar.update(downloaded - self.progress_bar.n)  # Update tqdm bar
+
+            percentage = int((downloaded / total) * 100)
+            self.download_progress.emit(percentage)
 
 
-from PyQt5.QtWidgets import QStyledItemDelegate, QApplication
-
-from PyQt5.QtCore import QSize
-
-# Custom Delegate to render widgets (title, progress bar, size)
-from PyQt5.QtWidgets import QStyledItemDelegate, QStyle, QStyleOptionProgressBar
-from PyQt5.QtCore import Qt, QRect
-
-# class VideoDelegate(QStyledItemDelegate):
-#     def paint(self, painter, option, index):
-#         # Get the video item
-#         video_item = index.data(Qt.DisplayRole)
-#         print(f"Video item: {video_item}")  # Print the video item
-#
-#         # Check if video_item is a dictionary
-#         if isinstance(video_item, dict):
-#             # Draw the title and size on the first line
-#             title = video_item.get('title', '')
-#             size = video_item.get('size', '')
-#             painter.drawText(option.rect, Qt.AlignLeft, f"{title} - {size}")
-#
-#             print("Before creating QStyleOptionProgressBar")
-#             progress_bar_option = QStyleOptionProgressBar()
-#             print("After creating QStyleOptionProgressBar")
-#
-#             print("Before setting rect property")
-#             progress_bar_option.rect = QRect(option.rect.left(), option.rect.top() + 20, option.rect.width(), 20)
-#             print("After setting rect property")
-#
-#             progress = video_item.get('progress', 0)
-#             print(f"Progress: {progress}")  # Print the progress value
-#
-#             print("Before setting progress property")
-#             progress_bar_option.progress = progress
-#             print("After setting progress property")
-#
-#             print("Before setting textVisible property")
-#             progress_bar_option.textVisible = True
-#             print("After setting textVisible property")
-#
-#             print("Before setting text property")
-#             progress_bar_option.text = f"{progress}%"
-#             print("After setting text property")
-#
-#             print("Before drawing progress bar")
-#             QApplication.style().drawControl(QStyle.CE_ProgressBar, progress_bar_option, painter)
-#             print("After drawing progress bar")
-#         else:
-#             print(f"Error: Expected a dictionary, but got {type(video_item)}")
-#
-#     def sizeHint(self, option, index):
-#         return QSize(200, 60)  # Customize size for each item
 
 
-# Custom Model to hold the download items
-class VideoListModel(QAbstractListModel):
-    def __init__(self, videos=None):
-        super(VideoListModel, self).__init__()
-        self.videos = videos or []
-
-    def data(self, index, role):
-        if role == Qt.DisplayRole:
-            # Return the entire video dictionary for the DisplayRole
-            return self.videos[index.row()]
-        if role == Qt.UserRole + 1:
-            return self.videos[index.row()]['progress']
-        if role == Qt.UserRole + 2:
-            return self.videos[index.row()]['size']
-        return QVariant()
-
-    def rowCount(self, parent=QModelIndex()):
-        return len(self.videos)
-
-    def addVideo(self, video):
-        self.beginInsertRows(QModelIndex(), self.rowCount(), self.rowCount())
-        self.videos.append(video)
-        self.endInsertRows()

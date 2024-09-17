@@ -1,68 +1,21 @@
-# main.py is the main file that contains the main application logic.
 import os
 import sys
 
-from PyQt5.QtCore import Qt, QRect, QSize
 from PyQt5.uic import loadUiType
 from PyQt5.QtWidgets import QMainWindow, QApplication, QFileDialog, QMessageBox, QLabel, QLineEdit, QPushButton, \
-    QComboBox, QListWidget, QListWidgetItem, QProgressBar, QWidget, QWidgetItem, QVBoxLayout, QListView, \
-    QStyledItemDelegate, QStyleOptionProgressBar, QStyle
+    QComboBox, QListWidget, QListWidgetItem, QProgressBar, QWidget, QWidgetItem, QVBoxLayout, QListView
+from PyQt5.QtCore import pyqtSignal, Qt
 
 import downloader
 import downloader as YD
 
 FORM_CLASS, _ = loadUiType(os.path.join(os.path.dirname(__file__), "UIs", "YV.ui"))
 
-class VideoDelegate(QStyledItemDelegate):
-    def paint(self, painter, option, index):
-        # Get the video item
-        video_item = index.data(Qt.DisplayRole)
-        print(f"Video item: {video_item}")  # Print the video item
-
-        # Check if video_item is a dictionary
-        if isinstance(video_item, dict):
-            # Draw the title and size on the first line
-            title = video_item.get('title', '')
-            size = video_item.get('size', '')
-            painter.drawText(option.rect, Qt.AlignLeft, f"{title} - {size}")
-
-            print("Before creating QStyleOptionProgressBar")
-            self.download_progress_hook = QStyleOptionProgressBar()
-            print("After creating QStyleOptionProgressBar")
-
-            print("Before setting rect property")
-            self.download_progress_hook.rect = QRect(option.rect.left(), option.rect.top() + 20, option.rect.width(), 20)
-            print("After setting rect property")
-
-            progress = video_item.get('progress', 0)
-            print(f"Progress: {progress}")  # Print the progress value
-
-            print("Before setting progress property")
-            self.download_progress_hook.progress = progress
-            print("After setting progress property")
-
-            print("Before setting textVisible property")
-            self.download_progress_hook.textVisible = True
-            print("After setting textVisible property")
-
-            print("Before setting text property")
-            self.download_progress_hook.text = f"{progress}%"
-            print("After setting text property")
-
-            print("Before drawing progress bar")
-            QApplication.style().drawControl(QStyle.CE_ProgressBar, self.download_progress_hook, painter)
-            print("After drawing progress bar")
-        else:
-            print(f"Error: Expected a dictionary, but got {type(video_item)}")
-
-    def sizeHint(self, option, index):
-        return QSize(200, 60)  # Customize size for each item
-
 class MainApp(QMainWindow, FORM_CLASS):
     def __init__(self, parent=None):
         super(MainApp, self).__init__(parent)
         self.setupUi(self)  # Ensure UI is set up before accessing UI elements
-
+        self.setWindowTitle("Youtube Video Downloader")
         # Find UI elements
         self.file_name_label = self.findChild(QLabel, 'FileType_2')
         self.file_duration_label = self.findChild(QLabel, 'FileType_3')
@@ -72,12 +25,12 @@ class MainApp(QMainWindow, FORM_CLASS):
         self.BrowseButton = self.findChild(QPushButton, 'BrowseButtonYV')
         self.DownloadButton = self.findChild(QPushButton, 'DownloadYoutubeVideo')
         self.QualityBox = self.findChild(QComboBox, 'QualityBox')
-
-        # Initialize QListView and Model
-        self.list_view = self.findChild(QListView, 'listView')
-        self.model = downloader.VideoListModel()
-        self.list_view.setModel(self.model)
-        self.list_view.setItemDelegate(downloader.VideoDelegate())  # Ensure delegate is set
+        self.SingleProgressBar = self.findChild(QProgressBar, 'SingleProgressBar')
+        self.SingleProgressBar.setValue(0)
+        # self.TotalProgressBar = self.findChild(QProgressBar, 'TotalProgressBar')
+        self.CurrentDownload = self.findChild(QLabel, 'label_2')
+        # self.number_of_videos = self.findChild(QLabel, 'label_4')
+        self.list_widget = self.findChild(QListWidget, 'listWidget')
 
         # Handle button connections
         self.Handle_Buttons()
@@ -91,7 +44,7 @@ class MainApp(QMainWindow, FORM_CLASS):
     def Handle_Buttons(self):
         self.BrowseButton.clicked.connect(self.Browse)
         self.cancel_button.clicked.connect(self.Cancel)
-        self.DownloadButton.clicked.connect(self.start_download)
+        self.DownloadButton.clicked.connect(self.start_download_single_video)
         self.url_entre_box.textChanged.connect(lambda: YD.get_info(self))
 
     def Cancel(self):
@@ -104,58 +57,52 @@ class MainApp(QMainWindow, FORM_CLASS):
             self.full_save_path = file_path
             self.file_path.setText(os.path.basename(file_path))
 
-    def start_download(self):
-
-
+    def start_download_single_video(self):
         # Get the size of the video for the selected quality
         size_str = downloader.extract_size(self.QualityBox.currentText())
 
-        # Create a new video item and add it to the model
+        # Create a new video item with initial progress
         video_item = {
             'title': self.file_name_label.text() if self.file_name_label.text() else 'untitled',
             'size': size_str,
             'progress': 0  # Initial progress, will be updated by progress hook
         }
+        # Add the video item to the list widget
+        self.list_widget.addItem(
+            f"Title: {video_item['title']}, Size: {video_item['size']}")
 
-        # Initialize QListView and Model
-        self.list_view = self.findChild(QListView, 'listView')
-        self.model = downloader.VideoListModel()
-        self.list_view.setModel(self.model)
-        # Add the video item to the model
-        self.model.addVideo(video_item)
-
-        self.list_view.setItemDelegate(VideoDelegate())  # Ensure delegate is set
-        # Optionally update the list view to reflect the new item
-        self.list_view.scrollToBottom()  # Ensure the view scrolls to the latest item
-
-        outtmpl = self.full_save_path
+        # Scroll to the bottom to show the new item
+        self.list_widget.scrollToBottom()
+        # Prepare download options
+        outtmpl = os.path.join(f'{self.full_save_path} .%(ext)s')
         quality = self.QualityBox.currentData() if self.QualityBox.currentData() else 'best'
+        url = self.url_entre_box.text()
+
+        # Initialize download thread with empty options
+        self.download_thread = YD.DownloadThread({}, url)  # Initialize download_thread with empty ydl_opts
+
         ydl_opts = {
             'outtmpl': outtmpl,
             'format': quality,
             'nocheckcertificate': True,
             'noplaylist': True,
-            'progress_hooks': [self.download_progress_hook],
+            # 'progress_hooks': [self.update_progress],
         }
-        url = self.url_entre_box.text()
-        self.download_thread = YD.DownloadThread(ydl_opts, url)
 
-        # Connect signals to slots
+        self.download_thread.ydl_opts = ydl_opts  # Update ydl_opts in download_thread
+
+        # Connect the signal to update progress
         self.download_thread.download_progress.connect(self.update_progress)
         self.download_thread.download_finished.connect(self.handle_download_finish)
-        # Start the thread
+
+        # Start the download thread
         self.download_thread.start()
 
-    # def update_progress_bar(self, d):
-    #     if d['status'] == 'downloading':
-    #         p = d['_percent_str']
-    #         p = p.replace('%','')
-    #         self.download_progress_hook.setValue(int(float(p)))
-
     def update_progress(self, progress):
-        # Directly update the progress bar using the received progress value
-        if isinstance(progress, int):
-            self.download_progress_hook.setValue(progress)
+        try:
+            self.SingleProgressBar.setValue(int(progress))  # Update the progress bar
+        except ValueError:
+            print(f"Error: Can't convert '{progress}' to integer at update_progress()")
 
     def handle_download_finish(self, success, message):
         if success:
@@ -163,66 +110,8 @@ class MainApp(QMainWindow, FORM_CLASS):
         else:
             QMessageBox.critical(self, "Download Error", message)
 
-class VideoDelegate(QStyledItemDelegate):
-    def paint(self, painter, option, index):
-        # Get the video item
-        video_item = index.data(Qt.DisplayRole)
-        print(f"Video item: {video_item}")  # Print the video item
 
-        # Check if video_item is a dictionary
-        if isinstance(video_item, dict):
-            # Draw the title and size on the first line
-            title = video_item.get('title', '')
-            size = video_item.get('size', '')
-            painter.drawText(option.rect, Qt.AlignLeft, f"{title} - {size}")
 
-            print("Before creating QStyleOptionProgressBar")
-            self.download_progress_hook = QStyleOptionProgressBar()
-            print("After creating QStyleOptionProgressBar")
-
-            print("Before setting rect property")
-            self.download_progress_hook.rect = QRect(option.rect.left(), option.rect.top() + 20, option.rect.width(), 20)
-            print("After setting rect property")
-
-            progress = video_item.get('progress', 0)
-            print(f"Progress: {progress}")  # Print the progress value
-
-            print("Before setting progress property")
-            self.download_progress_hook.progress = progress
-            print("After setting progress property")
-
-            print("Before setting textVisible property")
-            self.download_progress_hook.textVisible = True
-            print("After setting textVisible property")
-
-            print("Before setting text property")
-            self.download_progress_hook.text = f"{progress}%"
-            print("After setting text property")
-
-            print("Before drawing progress bar")
-            QApplication.style().drawControl(QStyle.CE_ProgressBar, self.download_progress_hook, painter)
-            print("After drawing progress bar")
-        else:
-            print(f"Error: Expected a dictionary, but got {type(video_item)}")
-
-    def sizeHint(self, option, index):
-        return QSize(200, 60)  # Customize size for each item
-
-class VideoItemWidget(QWidget):
-    def __init__(self, title, size, progress, parent=None):
-        super(VideoItemWidget, self).__init__(parent)
-        layout = QVBoxLayout(self)
-
-        # Create and add widgets for title, size, and progress
-        self.title_label = QLabel(title, self)
-        self.size_label = QLabel(size, self)
-        self.progress_bar = QProgressBar(self)
-        self.progress_bar.setValue(progress)
-
-        layout.addWidget(self.title_label)
-        layout.addWidget(self.size_label)
-        layout.addWidget(self.progress_bar)
-        self.setLayout(layout)
 def main():
     app = QApplication(sys.argv)
     window = MainApp()

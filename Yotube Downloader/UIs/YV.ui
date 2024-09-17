@@ -13,104 +13,142 @@
   <property name="windowTitle">
    <string>MainWindow</string>
   </property>
-  <widget class="QWidget" name="centralwidget">
-   <layout class="QGridLayout" name="gridLayout">
-    <item row="4" column="0">
-     <widget class="QLabel" name="label_13">
-      <property name="text">
-       <string>Quality</string>
-      </property>
-     </widget>
-    </item>
-    <item row="7" column="2">
-     <widget class="QCheckBox" name="checkBox_4">
-      <property name="text">
-       <string>Close The Program After Complete</string>
-      </property>
-     </widget>
-    </item>
-    <item row="0" column="1" colspan="3">
-     <widget class="QLabel" name="FileType_2">
-      <property name="text">
-       <string>Loading...</string>
-      </property>
-     </widget>
-    </item>
-    <item row="2" column="0">
-     <widget class="QLabel" name="label_3">
-      <property name="text">
-       <string>Location</string>
-      </property>
-     </widget>
-    </item>
-    <item row="1" column="0">
-     <widget class="QLabel" name="label_8">
-      <property name="text">
-       <string>URL</string>
-      </property>
-     </widget>
-    </item>
-    <item row="2" column="1" colspan="2">
-     <widget class="QLineEdit" name="SaveLocationYV"/>
-    </item>
-    <item row="0" column="0">
-     <widget class="QLabel" name="label_5">
-      <property name="text">
-       <string>File Info :</string>
-      </property>
-     </widget>
-    </item>
-    <item row="1" column="1" colspan="2">
-     <widget class="QLineEdit" name="lineEdit2"/>
-    </item>
-    <item row="3" column="1" colspan="2">
-     <widget class="QLabel" name="FileType_3">
-      <property name="text">
-       <string>Loading...</string>
-      </property>
-     </widget>
-    </item>
-    <item row="7" column="1">
-     <widget class="QCheckBox" name="checkBox_3">
-      <property name="styleSheet">
-       <string notr="true"/>
-      </property>
-      <property name="text">
-       <string>Shut Down After Complete</string>
-      </property>
-     </widget>
-    </item>
-    <item row="2" column="3">
-     <widget class="QPushButton" name="BrowseButtonYV">
-      <property name="text">
-       <string>Browse</string>
-      </property>
-     </widget>
-    </item>
-    <item row="4" column="1" colspan="2">
-     <widget class="QComboBox" name="QualityBox"/>
-    </item>
-    <item row="8" column="1">
-     <widget class="QPushButton" name="DownloadYoutubeVideo">
-      <property name="styleSheet">
-       <string notr="true">
+  <property name="styleSheet">
+   <string notr="true">/* Main Window Background with Creative Gradient */
+QMainWindow {
+    background: qlineargradient(x1:0, y1:0, x2:1, y2:1, 
+                                stop:0 #2C3E50, /* Deep Blue */
+                                stop:0.5 #8E44AD, /* Bright Purple */
+                                stop:1 #F39C12); /* Vibrant Orange */
+}
+
+/* General Widget Styling */
+QWidget {
+    background: rgba(255, 255, 255, 0.9); /* Slightly opaque white background */
+    border-radius: 10px; /* Rounded corners */
+    padding: 10px; /* Padding around widgets */
+}
+
+/* Push Button Styling */
+QPushButton {
+    background: qlineargradient(x1:0, y1:0, x2:1, y2:1, 
+                                stop:0 #3498DB, /* Sky Blue */
+                                stop:1 #2ECC71); /* Emerald Green */
+    color: white;
+    border: none;
+    border-radius: 5px;
+    padding: 10px 20px;
+    font-size: 14px;
+}
 
 QPushButton:hover {
-  background-color: green;
-  color: white;
+    background: qlineargradient(x1:0, y1:0, x2:1, y2:1, 
+                                stop:0 #2980B9, /* Darker Blue */
+                                stop:1 #27AE60); /* Darker Green */
 }
 
-QPushButton:pressed {
-  transform: scale(0.95);
+/* QLabel Styling */
+QLabel {
+    color: #2C3E50; /* Dark Blue text for better contrast */
+    font-size: 12px;
+    font-weight: bold;
+}
+
+/* QLineEdit Styling */
+QLineEdit {
+    background: white;
+    border: 1px solid #BDC3C7; /* Light Gray border */
+    border-radius: 5px;
+    padding: 5px;
+    font-size: 12px;
+    color: #2C3E50; /* Dark Blue text */
+}
+
+/* QProgressBar Styling */
+QProgressBar {
+    border: 1px solid #BDC3C7; /* Light Gray border */
+    border-radius: 5px;
+    text-align: center;
+}
+
+QProgressBar::chunk {
+    background: qlineargradient(x1:0, y1:0, x2:1, y2:1, 
+                                stop:0 #8E44AD, /* Bright Purple */
+                                stop:1 #F39C12); /* Vibrant Orange */
+    border-radius: 5px;
+}
+
+/* QScrollBar Styling */
+QScrollBar:horizontal {
+    border: 1px solid #BDC3C7;
+    background: #F1F1F1;
+    height: 8px;
+    border-radius: 4px;
+}
+
+QScrollBar:vertical {
+    border: 1px solid #BDC3C7;
+    background: #F1F1F1;
+    width: 8px;
+    border-radius: 4px;
+}
+
+QScrollBar::handle:horizontal {
+    background: #BDC3C7;
+    border-radius: 4px;
+}
+
+QScrollBar::handle:vertical {
+    background: #BDC3C7;
+    border-radius: 4px;
+}
+
+/* QTabWidget Styling */
+QTabWidget::pane {
+    border: 1px solid #BDC3C7;
+    border-radius: 10px;
+}
+
+QTabBar::tab {
+    background: qlineargradient(x1:0, y1:0, x2:1, y2:1, 
+                                stop:0 #3498DB, /* Sky Blue */
+                                stop:1 #2ECC71); /* Emerald Green */
+    color: white;
+    padding: 10px;
+    border-radius: 5px;
+}
+
+QTabBar::tab:selected {
+    background: qlineargradient(x1:0, y1:0, x2:1, y2:1, 
+                                stop:0 #2980B9, /* Darker Blue */
+                                stop:1 #27AE60); /* Darker Green */
+}
+
+/* QComboBox Styling */
+QComboBox {
+    background: white;
+    border: 1px solid #BDC3C7;
+    border-radius: 5px;
+    padding: 5px;
+    color: #2C3E50; /* Dark Blue text */
+}
+
+/* QCheckBox Styling */
+QCheckBox {
+    color: #2C3E50; /* Dark Blue text */
+}
+
+QCheckBox::indicator:checked {
+    background: qlineargradient(x1:0, y1:0, x2:1, y2:1, 
+                                stop:0 #8E44AD, /* Bright Purple */
+                                stop:1 #F39C12); /* Vibrant Orange */
+    border-radius: 5px;
 }
 </string>
-      </property>
-      <property name="text">
-       <string>DOWNLOAD</string>
-      </property>
-     </widget>
-    </item>
-    <item row="8" column="2">
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <layout class="QGridLayout" name="gridLayout">
+    <item row="11" column="2">
      <widget class="QPushButton" name="pushButton_3">
       <property name="styleSheet">
        <string notr="true">
@@ -130,6 +168,85 @@ QPushButton:pressed {
       </property>
      </widget>
     </item>
+    <item row="3" column="1" colspan="2">
+     <widget class="QLabel" name="FileType_3">
+      <property name="text">
+       <string>Loading...</string>
+      </property>
+     </widget>
+    </item>
+    <item row="7" column="1" colspan="2">
+     <widget class="QProgressBar" name="SingleProgressBar">
+      <property name="value">
+       <number>24</number>
+      </property>
+     </widget>
+    </item>
+    <item row="0" column="1" colspan="3">
+     <widget class="QLabel" name="FileType_2">
+      <property name="text">
+       <string>Loading...</string>
+      </property>
+     </widget>
+    </item>
+    <item row="0" column="0">
+     <widget class="QLabel" name="label_5">
+      <property name="text">
+       <string>File Info :</string>
+      </property>
+     </widget>
+    </item>
+    <item row="2" column="1" colspan="2">
+     <widget class="QLineEdit" name="SaveLocationYV"/>
+    </item>
+    <item row="8" column="1" colspan="2">
+     <widget class="QListWidget" name="listWidget">
+      <item>
+       <property name="text">
+        <string>The Download History</string>
+       </property>
+      </item>
+     </widget>
+    </item>
+    <item row="6" column="1" colspan="2">
+     <widget class="QLabel" name="label_2">
+      <property name="text">
+       <string>Loading...</string>
+      </property>
+     </widget>
+    </item>
+    <item row="1" column="1" colspan="2">
+     <widget class="QLineEdit" name="lineEdit2"/>
+    </item>
+    <item row="4" column="1" colspan="2">
+     <widget class="QComboBox" name="QualityBox"/>
+    </item>
+    <item row="11" column="1">
+     <widget class="QPushButton" name="DownloadYoutubeVideo">
+      <property name="styleSheet">
+       <string notr="true">QPushButton {
+  background-color: green;
+  color: white;
+}
+
+QPushButton:hover {
+  background-color: gray;
+  color: white;
+}
+
+QPushButton:pressed {
+  transform: scale(0.95);
+}
+</string>
+      </property>
+      <property name="text">
+       <string>DOWNLOAD</string>
+      </property>
+     </widget>
+    </item>
+    <item row="9" column="0">
+     <widget class="QWidget" name="widget" native="true"/>
+    </item>
     <item row="3" column="0">
      <widget class="QLabel" name="label_6">
       <property name="text">
@@ -137,11 +254,60 @@ QPushButton:pressed {
       </property>
      </widget>
     </item>
-    <item row="6" column="0">
-     <widget class="QWidget" name="widget" native="true"/>
+    <item row="2" column="3">
+     <widget class="QPushButton" name="BrowseButtonYV">
+      <property name="text">
+       <string>Browse</string>
+      </property>
+     </widget>
     </item>
-    <item row="5" column="1" colspan="2">
-     <widget class="QListView" name="listView"/>
+    <item row="4" column="0">
+     <widget class="QLabel" name="label_13">
+      <property name="text">
+       <string>Quality</string>
+      </property>
+     </widget>
+    </item>
+    <item row="10" column="1">
+     <widget class="QCheckBox" name="checkBox_3">
+      <property name="styleSheet">
+       <string notr="true">color:black;</string>
+      </property>
+      <property name="text">
+       <string>Shut Down After Complete</string>
+      </property>
+     </widget>
+    </item>
+    <item row="1" column="0">
+     <widget class="QLabel" name="label_8">
+      <property name="text">
+       <string>URL</string>
+      </property>
+     </widget>
+    </item>
+    <item row="2" column="0">
+     <widget class="QLabel" name="label_3">
+      <property name="text">
+       <string>Location</string>
+      </property>
+     </widget>
+    </item>
+    <item row="6" column="0">
+     <widget class="QLabel" name="label">
+      <property name="text">
+       <string>Current Downloading</string>
+      </property>
+     </widget>
+    </item>
+    <item row="10" column="2">
+     <widget class="QCheckBox" name="checkBox_4">
+      <property name="styleSheet">
+       <string notr="true">color:black;</string>
+      </property>
+      <property name="text">
+       <string>Close The Program After Complete</string>
+      </property>
+     </widget>
     </item>
    </layout>
   </widget>
@@ -151,7 +317,7 @@ QPushButton:pressed {
      <x>0</x>
      <y>0</y>
      <width>893</width>
-     <height>33</height>
+     <height>53</height>
     </rect>
    </property>
   </widget>

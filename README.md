@@ -6,7 +6,7 @@ Welcome to **YouTube Downloader** – your ultimate tool for downloading YouTube
 
 Check out how YouTube Downloader looks in action:
 
-- **Main Page**: ![Main Page](YouTube%20Downloader/assets/screenshots/MainPage.png)
+- **Main Page**: ![Main Page](/assets/screenshots/MainPage.png)
 - **Download Progress**: ![Progressbar](YouTube%20Downloader/assets/screenshots/Progressbar.png)
 - **Video Qualities**: ![Qualities](YouTube%20Downloader/assets/screenshots/Qualities.png)
 - **Fast Info Collection**: ![Fast Info Collect](YouTube%20Downloader/assets/screenshots/FastInfoCollect.png)
